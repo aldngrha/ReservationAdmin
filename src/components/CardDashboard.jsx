@@ -7,7 +7,7 @@ function CardDashboard({ icon, text, number }) {
 
   return (
     <View>
-      <View style={styles.cardContainer}>
+      <TouchableOpacity style={styles.cardContainer}>
         <View style={styles.leftContainer}>
           {icon}
           <Text style={styles.textLeft}>{text}</Text>
@@ -15,7 +15,7 @@ function CardDashboard({ icon, text, number }) {
         <View style={styles.rightContainer}>
           <Text style={styles.textRight}>{number}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }

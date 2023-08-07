@@ -13,7 +13,7 @@ function DashboardScreen() {
     <SafeAreaView style={styles.container}>
       <View>
         <View style={styles.welcomeContainer}>
-          <Text style={styles.welcome}>Selamat Datang, Aldi</Text>
+          <Text style={styles.welcome}>Selamat Datang, Nana!</Text>
         </View>
         <CardDashboard
           icon={<FontAwesome5 name="user-check" size={35} color="black" />}
@@ -40,7 +40,7 @@ export default DashboardScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#fafafa",
     flexWrap: "wrap",
     // paddingTop: 10,
   },
