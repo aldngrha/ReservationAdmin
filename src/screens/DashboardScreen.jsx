@@ -13,7 +13,7 @@ function DashboardScreen() {
     <SafeAreaView style={styles.container}>
       <View>
         <View style={styles.welcomeContainer}>
-          <Text style={styles.welcome}>Selamat Datang, Nana!</Text>
+          <Text style={styles.welcome}>Selamat Datang, Admin!</Text>
         </View>
         <CardDashboard
           icon={<FontAwesome5 name="user-check" size={35} color="black" />}

@@ -6,7 +6,7 @@ import { Alert } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-const ReservationScreen = () => {
+const TransactionScreen = () => {
   const [selectedTime, setSelectedTime] = useState(null);
 
   const navigation = useNavigation();
@@ -70,7 +70,7 @@ const ReservationScreen = () => {
       <ScrollView horizontal>
         <View>
           <View style={styles.beforeHead}>
-            <Text style={styles.timeDataText}>Data Reservasi</Text>
+            <Text style={styles.timeDataText}>Data Transaksi</Text>
           </View>
           <View style={styles.header}>
             <Text style={[styles.headerText, styles.headerItem]}>No</Text>
@@ -178,4 +178,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReservationScreen;
+export default TransactionScreen;

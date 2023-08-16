@@ -17,6 +17,9 @@ import RoomScreen from "./src/screens/RoomScreen";
 import AddRoomScreen from "./src/screens/AddRoomScreen";
 import EditRoomScreen from "./src/screens/EditRoomScreen";
 import ReservationScreen from "./src/screens/ReservationScreen";
+import TransactionScreen from "./src/screens/TransactionScreen";
+import StatusServiceScreen from "./src/screens/StatusServiceScreen";
+import LoginScreen from "./src/screens/LoginScreen";
 
 // const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -30,7 +33,8 @@ function DrawerScreen() {
       <Drawer.Screen name="Tanggal" component={DateScreen} />
       <Drawer.Screen name="Tempat" component={RoomScreen} />
       <Drawer.Screen name="Reservasi" component={ReservationScreen} />
-      {/* <Drawer.Screen name="Transaksi" component={ReadDataScreen} /> */}
+      <Drawer.Screen name="Transaksi" component={TransactionScreen} />
+      <Drawer.Screen name="Status Servis" component={StatusServiceScreen} />
     </Drawer.Navigator>
   );
 }
@@ -40,6 +44,11 @@ export default function App() {
     <PaperProvider>
       <NavigationContainer>
         <Stack.Navigator>
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="Dashboard"
             component={DrawerScreen}
