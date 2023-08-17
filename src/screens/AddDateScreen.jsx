@@ -1,18 +1,21 @@
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import {
   TextInput,
   Button,
   Portal,
   Modal,
-  Text,
   TouchableRipple,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { push, ref, set } from "firebase/database";
+import { database } from "../../firebaseConfig";
+import { useNavigation } from "@react-navigation/native";
 
 const AddDateScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const navigation = useNavigation();
 
   const showDatePicker = () => {
     setShowModal(true);
@@ -38,7 +41,19 @@ const AddDateScreen = () => {
   const handleSaveDate = () => {
     const formattedDate = formatDate(selectedDate);
     // Implement save date function here
-    console.log("Selected Date:", formattedDate);
+    const dateRef = push(ref(database, "dates"));
+
+    // Simpan data ke Firebase
+    set(dateRef, {
+      tanggal: formattedDate,
+    })
+      .then(() => {
+        Alert.alert("Data tanggal berhasil disimpan");
+        navigation.goBack();
+      })
+      .catch((error) => {
+        Alert.alert("Error saat menyimpan data tanggal:", error);
+      });
   };
 
   return (

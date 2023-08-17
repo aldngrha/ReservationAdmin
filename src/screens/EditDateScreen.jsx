@@ -1,18 +1,34 @@
-import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Alert } from "react-native";
 import {
   TextInput,
   Button,
   Portal,
   Modal,
-  Text,
   TouchableRipple,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { ref, update } from "firebase/database";
+import { database } from "../../firebaseConfig";
 
 const EditDateScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const navigation = useNavigation();
+
+  const route = useRoute();
+  const { key, date } = route.params;
+
+  useEffect(() => {
+    if (date) {
+      const initialDate = new Date(date);
+      setSelectedDate(initialDate);
+    }
+  }, [date]);
+
+  console.log(date);
 
   const showDatePicker = () => {
     setShowModal(true);
@@ -38,7 +54,17 @@ const EditDateScreen = () => {
   const handleSaveDate = () => {
     const formattedDate = formatDate(selectedDate);
     // Implement save date function here
-    console.log("Selected Date:", formattedDate);
+
+    // Update data waktu ke database
+    const timeRef = ref(database, `dates/${key}`);
+    update(timeRef, { tanggal: formattedDate })
+      .then(() => {
+        Alert.alert("Sukses", "Data waktu berhasil diubah");
+        navigation.goBack(); // Ganti dengan rute yang sesuai
+      })
+      .catch((error) => {
+        Alert.alert("Error", "Gagal mengubah data waktu");
+      });
   };
 
   return (

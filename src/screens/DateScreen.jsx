@@ -1,53 +1,82 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList } from "react-native-gesture-handler";
 import { Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { onValue, ref, remove } from "firebase/database";
+import { database } from "../../firebaseConfig";
 
 const DateScreen = () => {
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [dateData, setDateData] = useState([]); // State untuk data waktu
 
   const navigation = useNavigation();
 
-  // Data dummy untuk waktu
-  const tanggalData = [
-    { id: 1, nama_waktu: "27-07-2023" },
-    { id: 2, nama_waktu: "28-07-2023" },
-    { id: 3, nama_waktu: "29-07-2023" },
-    { id: 4, nama_waktu: "31-07-2023" },
-  ];
+  // Mengambil data waktu dari Firebase saat komponen selesai dimuat
+  useEffect(() => {
+    const fetchData = async () => {
+      const timeRef = ref(database, "dates");
+      onValue(timeRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const newData = Object.keys(data).map((key) => ({
+            key: key, // Menambahkan kunci unik ke dalam objek data
+            tanggal: data[key].tanggal,
+          }));
+          setDateData(newData);
+        }
+      });
+    };
+    fetchData();
+  }, []);
 
   const handleDeleteDate = (dateId) => {
     // Fungsi untuk menghandle hapus waktu berdasarkan ID
-    // Misalnya, munculkan konfirmasi sebelum menghapus waktu
-    Alert.alert("Konfirmasi", "Apakah Anda yakin ingin menghapus waktu ini?", [
-      { text: "Batal", style: "cancel" },
-      {
-        text: "Hapus",
-        onPress: () => {
-          console.log("Hapus waktu dengan ID:", dateId);
-          // Tambahkan logika hapus waktu sesuai dengan kebutuhan Anda
+    Alert.alert(
+      "Konfirmasi",
+      "Apakah Anda yakin ingin menghapus tanggal ini?",
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Hapus",
+          onPress: () => {
+            const dateRef = ref(database, `dates/${dateId}`);
+
+            remove(dateRef)
+              .then(() => {
+                Alert.alert("Sukses", "Data tanggal berhasil dihapus");
+                // Anda bisa menavigasi kembali ke halaman daftar waktu
+                // navigation.navigate("TimeScreen");
+              })
+              .catch((error) => {
+                Alert.alert("Error", "Gagal menghapus data tanggal");
+              });
+          },
+          style: "destructive",
         },
-        style: "destructive",
-      },
-    ]);
+      ]
+    );
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item, index }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.id}</Text>
-      <Text style={styles.cell}>{item.nama_waktu}</Text>
+      <Text style={styles.cell}>{index + 1}</Text>
+      <Text style={styles.cell}>{item.tanggal}</Text>
       <TouchableOpacity
         style={styles.editButton}
-        onPress={() => navigation.navigate("Edit Tanggal")}
+        onPress={() =>
+          navigation.navigate("Edit Tanggal", {
+            date: item.tanggal,
+            key: item.key,
+          })
+        }
       >
         <MaterialCommunityIcons name="pencil" size={17} color="white" />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => handleDeleteDate(item.id)}
+        onPress={() => handleDeleteDate(item.key)}
       >
         <MaterialCommunityIcons name="trash-can" size={17} color="white" />
       </TouchableOpacity>
@@ -72,8 +101,8 @@ const DateScreen = () => {
         <Text style={styles.headerText}>Action</Text>
       </View>
       <FlatList
-        data={tanggalData}
-        keyExtractor={(item) => item.id.toString()}
+        data={dateData}
+        keyExtractor={(item) => Object.keys(item)[0]}
         renderItem={renderItem}
         contentContainerStyle={styles.table}
       />
