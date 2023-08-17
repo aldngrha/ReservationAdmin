@@ -10,10 +10,12 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { auth } from "../../firebaseConfig";
+import { ActivityIndicator } from "react-native-paper";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // State for loading indicator
 
   const navigation = useNavigation();
 
@@ -28,14 +30,19 @@ const LoginScreen = () => {
   }, []);
 
   const handleLogin = () => {
-    // Implement your login logic here
+    setIsLoading(true); // Start loading
     auth
       .signInWithEmailAndPassword(email, password)
       .then((userCredentials) => {
         const user = userCredentials.user;
         Alert.alert("Logged In With: ", user.email);
       })
-      .catch((error) => Alert.alert("Email atau password salah"));
+      .catch((error) => {
+        Alert.alert("Email atau password salah");
+      })
+      .finally(() => {
+        setIsLoading(false); // Stop loading
+      });
   };
 
   return (
@@ -63,8 +70,16 @@ const LoginScreen = () => {
         secureTextEntry
         style={styles.input}
       />
-      <TouchableOpacity onPress={handleLogin} style={styles.button}>
-        <Text style={styles.text}>Login</Text>
+      <TouchableOpacity
+        onPress={handleLogin}
+        style={[styles.button, isLoading && styles.buttonLoading]}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text style={styles.text}>Login</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -111,8 +126,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 10,
   },
+  buttonLoading: {
+    opacity: 0.6,
+    backgroundColor: "skyblue",
+  },
   text: {
     color: "white",
+  },
+  loadingIndicator: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+    zIndex: 1,
   },
 });
 

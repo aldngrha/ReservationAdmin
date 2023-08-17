@@ -6,7 +6,7 @@ import {
 } from "@react-navigation/drawer";
 import MaterialIcon from "@expo/vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/core";
-// import { auth } from "../../firebase";
+import { auth } from "../../firebaseConfig";
 
 const CustomDrawer = (props) => {
   const navigation = useNavigation();
@@ -27,7 +27,7 @@ const CustomDrawer = (props) => {
       </DrawerContentScrollView>
       <View style={{ paddingVertical: 20, marginLeft: 10 }}>
         <TouchableOpacity
-          // onPress={handleSignOut}
+          onPress={handleSignOut}
           style={{ flexDirection: "row", alignItems: "center" }}
         >
           <MaterialIcon name="logout" size={20} />

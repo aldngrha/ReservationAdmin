@@ -1,5 +1,6 @@
 // Import the functions you need from the SDKs you need
 import * as firebase from "firebase/compat";
+import { getDatabase } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -8,6 +9,8 @@ import * as firebase from "firebase/compat";
 const firebaseConfig = {
   apiKey: "AIzaSyBTavHNmctJ5BaOxS9YwMD-SJQobac3eCk",
   authDomain: "reservation-af5d5.firebaseapp.com",
+  databaseURL:
+    "https://reservation-af5d5-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "reservation-af5d5",
   storageBucket: "reservation-af5d5.appspot.com",
   messagingSenderId: "709558317270",
@@ -24,5 +27,6 @@ if (firebase.apps.length === 0) {
 }
 
 const auth = firebase.auth();
+const database = getDatabase(app);
 
-export { auth };
+export { auth, database };

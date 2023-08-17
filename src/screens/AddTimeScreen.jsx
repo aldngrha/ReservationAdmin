@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import {
   TextInput,
   Button,
@@ -9,10 +9,15 @@ import {
   TouchableRipple,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { database } from "../../firebaseConfig";
+import { ref, push, set } from "firebase/database";
+import { useNavigation } from "@react-navigation/native";
 
 const AddTimeScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
+
+  const navigation = useNavigation();
 
   const showTimePicker = () => {
     setShowModal(true);
@@ -36,8 +41,20 @@ const AddTimeScreen = () => {
 
   const handleSaveTime = () => {
     const formattedTime = formatTime(selectedTime);
-    // Implement save time function here
-    console.log("Selected Time:", formattedTime);
+
+    const reservationRef = push(ref(database, "times"));
+
+    // Simpan data ke Firebase
+    set(reservationRef, {
+      waktu: formattedTime,
+    })
+      .then(() => {
+        Alert.alert("Data waktu berhasil disimpan");
+        navigation.goBack();
+      })
+      .catch((error) => {
+        Alert.alert("Error saat menyimpan data waktu:", error);
+      });
   };
 
   return (

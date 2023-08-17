@@ -1,53 +1,77 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { database } from "../../firebaseConfig";
+import { onValue, ref, remove } from "firebase/database";
 
 const TimeScreen = () => {
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [waktuData, setWaktuData] = useState([]); // State untuk data waktu
+
+  // Mengambil data waktu dari Firebase saat komponen selesai dimuat
+  useEffect(() => {
+    const fetchData = async () => {
+      const timeRef = ref(database, "times");
+      onValue(timeRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const newData = Object.keys(data).map((key) => ({
+            key: key, // Menambahkan kunci unik ke dalam objek data
+            waktu: data[key].waktu,
+          }));
+          setWaktuData(newData);
+        }
+      });
+    };
+    fetchData();
+  }, []);
 
   const navigation = useNavigation();
 
-  // Data dummy untuk waktu
-  const waktuData = [
-    { id: 1, nama_waktu: "08:00" },
-    { id: 2, nama_waktu: "10:00" },
-    { id: 3, nama_waktu: "13:00" },
-    { id: 4, nama_waktu: "15:00" },
-  ];
-
   const handleDeleteTime = (timeId) => {
     // Fungsi untuk menghandle hapus waktu berdasarkan ID
-    // Misalnya, munculkan konfirmasi sebelum menghapus waktu
     Alert.alert("Konfirmasi", "Apakah Anda yakin ingin menghapus waktu ini?", [
       { text: "Batal", style: "cancel" },
       {
         text: "Hapus",
         onPress: () => {
-          console.log("Hapus waktu dengan ID:", timeId);
-          // Tambahkan logika hapus waktu sesuai dengan kebutuhan Anda
+          const timeRef = ref(database, `times/${timeId}`);
+
+          remove(timeRef)
+            .then(() => {
+              Alert.alert("Sukses", "Data waktu berhasil dihapus");
+              // Anda bisa menavigasi kembali ke halaman daftar waktu
+              // navigation.navigate("TimeScreen");
+            })
+            .catch((error) => {
+              Alert.alert("Error", "Gagal menghapus data waktu");
+            });
         },
         style: "destructive",
       },
     ]);
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item, index }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.id}</Text>
-      <Text style={styles.cell}>{item.nama_waktu}</Text>
+      <Text style={styles.cell}>{index + 1}</Text>
+      <Text style={styles.cell}>{item.waktu}</Text>
       <TouchableOpacity
         style={styles.editButton}
-        onPress={() => navigation.navigate("Edit Waktu")}
+        onPress={() =>
+          navigation.navigate("Edit Waktu", {
+            time: item.waktu,
+            key: item.key,
+          })
+        }
       >
         <MaterialCommunityIcons name="pencil" size={17} color="white" />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => handleDeleteTime(item.id)}
+        onPress={() => handleDeleteTime(item.key)}
       >
         <MaterialCommunityIcons name="trash-can" size={17} color="white" />
       </TouchableOpacity>
@@ -73,7 +97,7 @@ const TimeScreen = () => {
       </View>
       <FlatList
         data={waktuData}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => Object.keys(item)[0]}
         renderItem={renderItem}
         contentContainerStyle={styles.table}
       />
