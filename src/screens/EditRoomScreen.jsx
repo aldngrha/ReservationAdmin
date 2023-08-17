@@ -1,13 +1,38 @@
-import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Text } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { ref, update } from "firebase/database";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, TextInput, Text, Alert } from "react-native";
 import { Button } from "react-native-paper";
+import { database } from "../../firebaseConfig";
 
 const EditRoomScreen = () => {
   const [room, setRoom] = useState("");
+  const navigation = useNavigation();
+
+  const route = useRoute();
+  const { key, initialRoom } = route.params; // Ambil nilai waktu dari parameter rute
+
+  useEffect(() => {
+    if (initialRoom) {
+      setRoom(initialRoom);
+    }
+  }, [initialRoom]);
 
   const handleSaveDate = () => {
-    // Implement save date function here
-    console.log("Tempat:", room);
+    // Implement save date function here// Implement save date function hereconst dateRef = push(ref(database, "dates"));
+
+    const roomRef = ref(database, `rooms/${key}`);
+    // Simpan data ke Firebase
+    update(roomRef, {
+      tempat: room,
+    })
+      .then(() => {
+        Alert.alert("Data tempat berhasil disimpan");
+        navigation.goBack();
+      })
+      .catch((error) => {
+        Alert.alert("Error saat menyimpan data tempat:", error);
+      });
   };
 
   return (

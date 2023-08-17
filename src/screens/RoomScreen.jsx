@@ -1,53 +1,76 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { database } from "../../firebaseConfig";
+import { onValue, ref, remove } from "firebase/database";
 
 const RoomScreen = () => {
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [roomData, setRoomData] = useState([]); // State untuk data waktu
 
   const navigation = useNavigation();
 
-  // Data dummy untuk waktu
-  const roomData = [
-    { id: 1, nama_waktu: "A" },
-    { id: 2, nama_waktu: "B" },
-    { id: 3, nama_waktu: "C" },
-    { id: 4, nama_waktu: "D" },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      const timeRef = ref(database, "rooms");
+      onValue(timeRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const newData = Object.keys(data).map((key) => ({
+            key: key, // Menambahkan kunci unik ke dalam objek data
+            tempat: data[key].tempat,
+          }));
+          setRoomData(newData);
+        }
+      });
+    };
+    fetchData();
+  }, []);
 
-  const handleDeleteDate = (dateId) => {
+  const handleDeleteDate = (roomId) => {
     // Fungsi untuk menghandle hapus waktu berdasarkan ID
-    // Misalnya, munculkan konfirmasi sebelum menghapus waktu
-    Alert.alert("Konfirmasi", "Apakah Anda yakin ingin menghapus waktu ini?", [
+    Alert.alert("Konfirmasi", "Apakah Anda yakin ingin menghapus tempat ini?", [
       { text: "Batal", style: "cancel" },
       {
         text: "Hapus",
         onPress: () => {
-          console.log("Hapus waktu dengan ID:", dateId);
-          // Tambahkan logika hapus waktu sesuai dengan kebutuhan Anda
+          const timeRef = ref(database, `rooms/${roomId}`);
+
+          remove(timeRef)
+            .then(() => {
+              Alert.alert("Sukses", "Data tempat berhasil dihapus");
+              // Anda bisa menavigasi kembali ke halaman daftar waktu
+              // navigation.navigate("TimeScreen");
+            })
+            .catch((error) => {
+              Alert.alert("Error", "Gagal menghapus data tempat");
+            });
         },
         style: "destructive",
       },
     ]);
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item, index }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.id}</Text>
-      <Text style={styles.cell}>{item.nama_waktu}</Text>
+      <Text style={styles.cell}>{index + 1}</Text>
+      <Text style={styles.cell}>{item.tempat}</Text>
       <TouchableOpacity
         style={styles.editButton}
-        onPress={() => navigation.navigate("Edit Tempat")}
+        onPress={() =>
+          navigation.navigate("Edit Tempat", {
+            initialRoom: item.tempat,
+            key: item.key,
+          })
+        }
       >
         <MaterialCommunityIcons name="pencil" size={17} color="white" />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => handleDeleteDate(item.id)}
+        onPress={() => handleDeleteDate(item.key)}
       >
         <MaterialCommunityIcons name="trash-can" size={17} color="white" />
       </TouchableOpacity>
@@ -68,12 +91,12 @@ const RoomScreen = () => {
       </View>
       <View style={styles.header}>
         <Text style={styles.headerText}>No</Text>
-        <Text style={styles.headerText}>Tanggal</Text>
+        <Text style={styles.headerText}>Tempat</Text>
         <Text style={styles.headerText}>Action</Text>
       </View>
       <FlatList
         data={roomData}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => Object.keys(item)[0]}
         renderItem={renderItem}
         contentContainerStyle={styles.table}
       />
